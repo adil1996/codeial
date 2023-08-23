@@ -100,3 +100,8 @@ module.exports.createSession = (req, res) => {
         }
     )
 }
+
+module.exports.signOut = (req, res) => {
+    res.clearCookie("user_id")
+    return res.redirect('/users/sign-in')
+}
