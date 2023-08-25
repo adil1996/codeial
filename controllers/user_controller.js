@@ -1,32 +1,19 @@
 const User = require('../models/user')
 
 module.exports.profiles = (req, res) => {
-    console.log(req.cookies)
-    if (req.cookies.user_id) {
-        User.findById(req.cookies.user_id).then(
-            data => {
-                if (data) {
-                    return res.render('user_profile', {
-                        title: 'User Profile',
-                        user: data
-                    })
-
-                } else {
-                    return res.redirect('/users/sign-in')
-                }
-            }
-        ).catch(
-            err => {
-                console.log('error while loading gthe profile page')
-            }
-        )
-    } else {
-        return res.redirect('/users/sign-in')
-    }
+      
+    return res.render('user_profile', {
+        title: 'User Profile'
+    })
 }
 
 
 module.exports.signUp = (req, res) => {
+
+    if(req.isAuthenticated()){
+        return res.redirect('/users/profile')
+    }
+
     return res.render('user_sign_up', {
         title: "Codeial ! Sign Up"
     })
@@ -35,14 +22,15 @@ module.exports.signUp = (req, res) => {
 
 module.exports.signIn = (req, res) => {
 
-    if (!req.cookies.user_id) {
+    if(req.isAuthenticated()){
+        return res.redirect('/users/profile')
+    }
+
+
         return res.render('user_sign_in', {
             title: "Codeial ! Sign In"
         })
-    }
-    else {
-        return res.redirect('/users/profile')
-    }
+    
 }
 
 module.exports.create = (req, res) => {
@@ -77,26 +65,13 @@ module.exports.create = (req, res) => {
 }
 
 module.exports.createSession = (req, res) => {
+    return res.redirect('/')
+}
 
-    User.findOne({ email: req.body.email }).then(
-        data => {
-            if (data) {
-                if (data.password != req.body.password) {
-                    return res.redirect('back')
-                }
-
-                res.cookie('user_id', data.id)
-                return res.redirect('/users/profile')
-
-            }
-            else {
-                return res.redirect('back');
-            }
-        }
-    ).catch(
-        err => {
-            console.log("error while finding user in signin")
-            return
-        }
-    )
+module.exports.destroySession = (req, res) => {
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+      });
+    
 }
